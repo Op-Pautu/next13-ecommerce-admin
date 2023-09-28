@@ -1,6 +1,6 @@
 "use client";
 
-import { useStoreModal } from "@/hooks/use-store-modal";
+import { useStoreModal } from "@/hooks/useStoreModal";
 import { useEffect } from "react";
 
 export default function SetupPage() {

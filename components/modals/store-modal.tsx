@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import * as z from "zod";
 import axios from "axios";
 
-import { useStoreModal } from "@/hooks/use-store-modal";
+import { useStoreModal } from "@/hooks/useStoreModal";
 import Modal from "@/components/ui/modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
