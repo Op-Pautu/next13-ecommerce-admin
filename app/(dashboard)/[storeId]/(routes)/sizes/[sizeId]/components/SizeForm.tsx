@@ -27,7 +27,7 @@ import ImageUpload from "@/components/ui/imageUpload";
 
 const formSchema = z.object({
   name: z.string().min(3),
-  value: z.string().min(3),
+  value: z.string().min(1),
 });
 
 type SizeFormValues = z.infer<typeof formSchema>;
