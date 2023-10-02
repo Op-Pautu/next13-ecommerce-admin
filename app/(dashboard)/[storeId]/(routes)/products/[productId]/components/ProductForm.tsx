@@ -1,19 +1,17 @@
 "use client";
 
-import { Category, Color, Image, Product, Size } from "@prisma/client";
 import * as z from "zod";
-import React, { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Separator } from "@/components/ui/separator";
-import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import axios from "axios";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "react-hot-toast";
+import { Trash } from "lucide-react";
+import { Category, Color, Image, Product, Size } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 
-import Heading from "@/components/ui/heading";
-import { Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -23,19 +21,21 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
+import Heading from "@/components/ui/heading";
 import { AlertModal } from "@/components/modals/alert-modal";
-import ImageUpload from "@/components/ui/imageUpload";
 import {
   Select,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SelectContent } from "@radix-ui/react-select";
+import ImageUpload from "@/components/ui/imageUpload";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
-  name: z.string().min(3),
+  name: z.string().min(1),
   images: z.object({ url: z.string() }).array(),
   price: z.coerce.number().min(1),
   categoryId: z.string().min(1),
@@ -58,7 +58,7 @@ interface ProductFormProps {
   sizes: Size[];
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({
+export const ProductForm: React.FC<ProductFormProps> = ({
   initialData,
   categories,
   sizes,
@@ -71,27 +71,29 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [loading, setLoading] = useState(false);
 
   const title = initialData ? "Edit product" : "Create product";
-  const description = initialData ? "Edit a product" : "Add a new product";
+  const description = initialData ? "Edit a product." : "Add a new product";
   const toastMessage = initialData ? "Product updated." : "Product created.";
   const action = initialData ? "Save changes" : "Create";
 
+  const defaultValues = initialData
+    ? {
+        ...initialData,
+        price: parseFloat(String(initialData?.price)),
+      }
+    : {
+        name: "",
+        images: [],
+        price: 0,
+        categoryId: "",
+        colorId: "",
+        sizeId: "",
+        isFeatured: false,
+        isArchived: false,
+      };
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData
-      ? {
-          ...initialData,
-          price: parseFloat(String(initialData?.price)),
-        }
-      : {
-          name: "",
-          images: [],
-          price: 0,
-          categoryId: "",
-          colorId: "",
-          sizeId: "",
-          isFeatured: false,
-          isArchived: false,
-        },
+    defaultValues,
   });
 
   const onSubmit = async (data: ProductFormValues) => {
@@ -108,8 +110,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
       router.refresh();
       router.push(`/${params.storeId}/products`);
       toast.success(toastMessage);
-    } catch (error) {
-      toast.error("Something went wrong");
+    } catch (error: any) {
+      toast.error("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -122,13 +124,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
       router.refresh();
       router.push(`/${params.storeId}/products`);
       toast.success("Product deleted.");
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Something went wrong.");
     } finally {
       setLoading(false);
       setOpen(false);
     }
   };
+
   return (
     <>
       <AlertModal
@@ -143,7 +146,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <Button
             disabled={loading}
             variant="destructive"
-            size="icon"
+            size="sm"
             onClick={() => setOpen(true)}
           >
             <Trash className="h-4 w-4" />
@@ -180,7 +183,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               </FormItem>
             )}
           />
-          <div className="grid grid-cols-3 gap-8">
+          <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
               name="name"
@@ -316,10 +319,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={form.control}
               name="isFeatured"
               render={({ field }) => (
-                <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
+                      // @ts-ignore
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
@@ -336,17 +340,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
               control={form.control}
               name="isArchived"
               render={({ field }) => (
-                <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                   <FormControl>
                     <Checkbox
                       checked={field.value}
+                      // @ts-ignore
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>Archived</FormLabel>
                     <FormDescription>
-                      This product will not appear anywhere in the store
+                      This product will not appear anywhere in the store.
                     </FormDescription>
                   </div>
                 </FormItem>
@@ -361,5 +366,3 @@ const ProductForm: React.FC<ProductFormProps> = ({
     </>
   );
 };
-
-export default ProductForm;
